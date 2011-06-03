@@ -21,7 +21,7 @@ if (!Array.prototype.map) {
   
 var xImg = global.xImg = function(url){
   this.tryNb = 0;
-  this.url = url;
+  this.url = url.charAt(url.length-1) == '?' ? url : url+'?';
 };
 
 xImg.prototype = {
@@ -41,7 +41,7 @@ xImg.prototype = {
     ,   ctx = this;
     
     if(!cbError){
-      cbError = $.noop;
+      cbError = function(){};
     }
     
     
@@ -106,16 +106,15 @@ xImg.prototype = {
   },
   
   _sendPackets: function(packetsArray, cbSuccess, cbError){
-
+    var ctx = this;
+    
     function sendNext(){
       if(packetsArray.length === 0){
         cbSuccess();
         return;
       }
       
-      var packet = packetsArray.shift();
-      
-      this._sendPacket(packet, sendNext, cbError);
+      ctx._sendPacket(packetsArray.shift(), sendNext, cbError);
     }
     
     sendNext();
@@ -124,17 +123,17 @@ xImg.prototype = {
   _sendPacket: function(urlWithData, cbSuccess, cbError){
     var ctx = this;
     
-    this.tryNb = 0;
-    
+    ctx.tryNb = 0;
+
     function trySend(){
       
-      if(ctx.tryNb+1 == ctx.MAX_TRY){
+      if(ctx.tryNb == ctx.MAX_TRY){
         cbError("MAX_TRY reached");
         return;
       }
       
       ctx._send(urlWithData, cbSuccess, function(){
-        // On error, try again until tryNb >= MAX_TRY
+        // Callback onError, try until tryNb < MAX_TRY
         ctx.tryNb++;
         trySend();
       });
@@ -145,20 +144,27 @@ xImg.prototype = {
   
   // Send with image transport. Handle try
   _send: function(urlWithData, cbSuccess, cbError){
-    var i = new Image();
+    var i = new Image()
+    ,   el = null;
 
+    i.setAttribute("style","width:1px;height:1px;");
+    
     // urlWithData <- encodeURIComponent(urlWithData)
     i.src = urlWithData;
 
     i.onload = function(){
       i.onload = null;
+      document.body.removeChild(el);
       cbSuccess();
     }
 
     i.onError = function(){
       i.onError = null;
+      document.body.removeChild(el);
       cbError();
     }
+    
+    el = document.body.appendChild(i);
   }
   
 };

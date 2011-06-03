@@ -1,0 +1,6 @@
+[submodule "json2"]
+	path = json2
+	url = https://github.com/douglascrockford/JSON-js.git
+[submodule "tests/qunit"]
+	path = tests/qunit
+	url = https://github.com/jquery/qunit.git

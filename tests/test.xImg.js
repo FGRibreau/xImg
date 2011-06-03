@@ -2,8 +2,18 @@ module("xImg");
 
 var url = 'http://ndd.com/serv?';
 
+var oldSend = xImg.prototype._send;
+
+function cJs(sz, l){
+  return {'ok':(new Array(sz-22)).join(l || 'a')};
+}
+
+function tJs(object){
+  return encodeURIComponent(JSON.stringify(object));
+}
+
 function mJs(sz){
-  return encodeURIComponent(JSON.stringify({'ok':(new Array(sz+1)).join('a')})).substr(23);
+  return tJs(cJs(sz));
 }
 
 test('url', function(){
@@ -60,8 +70,8 @@ test('makePackets', function(){
 test('send without buffer', function(){
   expect(2);
   
-  var data = (new Array(501)).join('a');
-  equals(data.length, 500, '');
+  var data = cJs(500);
+  equals(tJs(data).length, 500, '');
   
   // Override the xImg._send method
   xImg.prototype._send = function(urlWithData, cbSuccess, cbError){
@@ -80,8 +90,8 @@ test('send without buffer', function(){
 test('send without buffer (with error handling)', function(){
   expect(4);
   
-  var data = (new Array(501)).join('a');
-  equals(data.length, 500, '');
+  var data = cJs(500);
+  equals(tJs(data).length, 500, '');
   
   var i = 0;
   // Override the xImg._send method
@@ -99,10 +109,10 @@ test('send without buffer (with error handling)', function(){
 });
 
 test('send without buffer (with error handling + MAX_TRY reached)', function(){
-  expect(4);
+  expect(1 + (xImg.prototype.MAX_TRY+1));
   
-  var data = (new Array(501)).join('a');
-  equals(data.length, 500, '');
+  var data = cJs(500);
+  equals(tJs(data).length, 500, '');
   
   var i = 0;
   
@@ -122,10 +132,12 @@ test('send without buffer (with error handling + MAX_TRY reached)', function(){
 });
 
 test('sendSimple without buffer (with error handling + MAX_TRY reached)', function(){
-  expect(6);
+  expect(4 + (xImg.prototype.MAX_TRY+1));
   
-  var data = (new Array(501)).join('a');
-  equals(data.length, 500, '');
+  var ximg = new xImg(url);
+  var data = cJs(500);
+  equals(tJs(data).length, 500, 'Data size');
+  equals(ximg._getPacketNb(tJs(data)), 1, 'Packet number');
   
   var i = 0;
   
@@ -135,8 +147,7 @@ test('sendSimple without buffer (with error handling + MAX_TRY reached)', functi
     cbError();
   };
   
-  var ximg = new xImg(url);
-  
+
   ximg._sendPacket(data, function(){
     ok(false, "Callback on success called");
   }, function(){
@@ -147,15 +158,43 @@ test('sendSimple without buffer (with error handling + MAX_TRY reached)', functi
   xImg.prototype._send = function(urlWithData, cbSuccess, cbError){ok(true, "_send2 called");cbSuccess();};
   
   ximg.send(data, function(){
-    ok(true, "On success callback called");
+    ok(true, "On success callback2 called");
   }, function(){
-    ok(false, "On error callback called");
+    ok(false, "On error callback2 called");
   });
   
 });
 
-test('send with buffer', function(){
-  expect(5);
+test('send with buffer (3 packets)', function(){
+  expect(6);
+  
+  var x = (new xImg(url));
+  
+  
+  var data = cJs(2000);
+  equals(tJs(data).length, 2000, 'Data size');
+  equals(x._getPacketNb(tJs(data)), 3, 'Packet number');
+  
+  var i = 0;
+  
+  // Override the xImg._send method
+  xImg.prototype._send = function(urlWithData, cbSuccess, cbError){
+    ok(true, "_send called n°"+(i+1));
+    
+    cbSuccess();
+  };
+  
+  x.send(data, function(){
+    ok(true, "On success callback called");
+  }, function(){
+    ok(false, "On error callback called");
+  });
+
+});
+
+
+test('send with buffer (3 packets, with error handling)', function(){
+  expect(9);
   
   var x = (new xImg(url));
   var data = (new Array(2001)).join('a');
@@ -164,81 +203,50 @@ test('send with buffer', function(){
   equals(x._getPacketNb(data), 3, 'Packet number');
   
   var i = 0;
+  
   // Override the xImg._send method
   xImg.prototype._send = function(urlWithData, cbSuccess, cbError){
-    ok(true, "_send called");
+    ++i;
     
-    ++i == 6 ? cbSuccess() : cbError();
+    ok(true, "_send called n°"+ i +' '+ (i == 2 || i == 4 || i == 5 ? 'cbError()':''));
+    
+    i == 2 || i == 4 || i == 5 ? cbError() : cbSuccess();
   };
   
   x.send(data, function(){
-    ok(false, "On success callback called");
+    ok(true, "On success callback called");
   }, function(){
-    ok(true, "On error callback called");
+    ok(false, "On error callback called");
   });
+
+});
+
+test('_send', function(){
   
+  var x = (new xImg(url));
+  x._send('','');
 });
 
 /*
-var callback = function(oldValue, newValue){
-  ok(true, 'Callback (value changed from '+ oldValue + ' to ' + newValue + ')');
-};
+Real world test:
 
-test('Input::value', function(){
-	var $elmts = $('#qunit-fixture input')
-	  , i = $elmts.length
-	  , a = 0;
+asyncTest('send with buffer with real url', 3, function(){
   
-  expect(i*4);
-  //Init observer
-	while(i--){
-	  $elmts.eq(i).AttributeObserver('value', callback, 100);
-	  
-	  equals(typeof($elmts.eq(i).AttributeObserver()), 'object', 'Get instance');
-	}
+  var x = (new xImg('http://labs.local/js-xImg/xImg.php'));
 
-	//Change value (the low level way)
-	$elmts.each(function(id, el){
-	  this.setAttribute('value','myNewValue');
-	});
-	
-	stop();
+  var data = cJs(2000,'d');
+  equals(tJs(data).length, 2000, 'Data size');
+  equals(x._getPacketNb(tJs(data)), 3, 'Packet number');
+  
+  xImg.prototype._send = oldSend;
+  //stop();
+  x.send(data, function(){
+    ok(true, "On success callback called");
+    start();
+  }, function(){
+    ok(false, "On error callback called");
+    start();
+  });
 
-	setTimeout(function(){
-	  start();//Restart test
-	  $elmts.each(function(i){
-  	  var inst = $elmts.eq(i).AttributeObserver();
-      ok(inst && inst.remove, 'Get instance');
-      inst.remove();
-
-      equals($elmts.eq(i).AttributeObserver(), null, 'Remove instance');
-    });
-    
-	},300);
 });
-
-test('iFrame::src', function(){
-	var $elmt = $('#myiframe')
-	  , a = 0;
-  
-  expect(4);
-  //Init observer
-	$elmt.AttributeObserver('src', callback);
-	var inst = $elmt.AttributeObserver();
-	ok(inst && inst.remove, 'Get instance');
-
-	//Change value (jQuery way)
-	$elmt.attr('src', 'http://www.google.com/');
-	
-	stop();
-
-	setTimeout(function(){
-	  start();//Restart test
-	  
-	  var inst = $elmt.AttributeObserver();
-    ok(inst && inst.remove, 'Get instance');
-    inst.remove();
-
-    equals($elmt.AttributeObserver(), null, 'Remove instance');
-	},1100);
-});*/
+*/
