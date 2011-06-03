@@ -8,12 +8,9 @@
 
 ## How to use:
 
-* Get the library (and the JSON2 dependency)
-``
-	git clone git@github.com:FGRibreau/xImg.git
-	cd ./xImg && git submodule init && git submodule update
-``
-	
+* Get the library (and the JSON2 dependency):
+	* `git clone git@github.com:FGRibreau/xImg.git`
+	* `cd ./xImg && git submodule init && git submodule update`
 * Upload `xImg.php` to your server
 * Insert `xImg.js` & `json2.js` at the end for your document
 * Now you can do this:
