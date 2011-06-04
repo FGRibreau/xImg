@@ -12,14 +12,14 @@
 	* `git clone git@github.com:FGRibreau/xImg.git`
 	* `cd ./xImg && git submodule init && git submodule update`
 * Upload `xImg.php` to your server
-* Insert `xImg.js` & `json2.js` at the end for your document
-* Now you can do this:
+* Insert `xImg.js` & `json2.js` at the end of your document
+* And now you can do this:
 
 ```javascript
-var mySender = new xImg('http://myserver.com/xImg.php?');
+var mySender = new xImg('http://myServerOnAnotherDomain.com/xImg.php?');
 mySender.send({screen:screen, cookie:document.cookie, UA: navigator.useragent}
 , function(){
-	alert('Done !');
+	alert('It\'s done !');
 }
 , function(){
 	alert('Oups something went wrong :s');

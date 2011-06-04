@@ -221,12 +221,6 @@ test('send with buffer (3 packets, with error handling)', function(){
 
 });
 
-test('_send', function(){
-  
-  var x = (new xImg(url));
-  x._send('','');
-});
-
 /*
 Real world test:
 

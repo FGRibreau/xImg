@@ -120,6 +120,7 @@ xImg.prototype = {
     sendNext();
   },
   
+  // Send with image transport, handle try
   _sendPacket: function(urlWithData, cbSuccess, cbError){
     var ctx = this;
     
@@ -142,7 +143,7 @@ xImg.prototype = {
     trySend();
   },
   
-  // Send with image transport. Handle try
+  // Send with image transport
   _send: function(urlWithData, cbSuccess, cbError){
     var i = new Image()
     ,   el = null;
