@@ -31,14 +31,18 @@ xImg.prototype = {
   MAX_TRY:3,
   
   // Envoi une donnée via un GET sur un fichier php
-  // @url doit contenir à la fin un "?"
-  // @data est un objet javascript
-  // @cbSuccess callback une fois l'envoi terminé
-  // @cbError callback une fois l'envoi terminé
+  // @url du script xImg.php
+  // @data objet contenant les données (sera JSON.stringify)
+  // @cbSuccess (option) callback une fois l'envoi terminé
+  // @cbError (option) callback une fois l'envoi terminé
   send: function(data, cbSuccess, cbError){
     
     var json = encodeURIComponent(JSON.stringify(data))
     ,   ctx = this;
+    
+    if(!cbSuccess){
+      cbSuccess = function(){};
+    }
     
     if(!cbError){
       cbError = function(){};
@@ -62,7 +66,7 @@ xImg.prototype = {
     }
   },
   
-  // Get the number of packet
+  // Get the approximative number of packet
   _getPacketNb: function(json){
     if(!json){
       throw new Error("No json, or url specified");
@@ -78,16 +82,28 @@ xImg.prototype = {
     
     var packets = []
     
-    // Packet number
-    ,   packetsNb = this._getPacketNb(json)
+    // Packet default size (+- 2 char)
+    ,   pSz = (this.MAX_GET - this.url.length - this.KEYWORD_SZ)
     
-    // Packet size
-    ,   pSz = (this.MAX_GET - this.url.length - this.KEYWORD_SZ);
+    ,   start = 0
+    ,   chunk = json.substr(start, pSz);
     
     // Split json by chunk of (this.MAX_GET - this.url.length - this.KEYWORD_SZ)
-    for(var i=0; i < packetsNb; i++) { 
-      packets.push(json.substr(i*pSz, pSz));
-    }
+    
+    while(chunk != ''){
+      
+      if(chunk.charAt(chunk.length - 1) === '%'){// ad% | 20sdsd
+        chunk = json.substr(start, pSz+2);
+        start += 2;
+      } else if(chunk.charAt(chunk.length - 2) === '%'){// d%2 | 0sdsd
+        chunk = json.substr(start, pSz+1);
+        start += 1;
+      }
+      
+      packets.push(chunk);
+      
+      chunk = json.substr((start += pSz), pSz);
+    };
     
     return packets;
   },
