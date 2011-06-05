@@ -21,7 +21,13 @@ if (!Array.prototype.map) {
   
 var xImg = global.xImg = function(url){
   this.tryNb = 0;
-  this.url = url.charAt(url.length-1) == '?' ? url : url+'?';
+  
+  this.url = url;
+
+  var l = url.charAt(url.length-1);
+  if(l !== '?' && l !== '&'){
+    this.url = url+'?';
+  }
 };
 
 xImg.prototype = {
