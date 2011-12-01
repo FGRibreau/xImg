@@ -1,4 +1,4 @@
-module("xImg");
+!module.exports && module("xImg");
 
 var url = 'http://ndd.com/serv?';
 

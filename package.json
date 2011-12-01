@@ -1,0 +1,21 @@
+{
+    "name" : "xImg",
+    "description" : "xImg",
+    "keywords": ["xImg"],
+    "version": "1.0.0",
+    "homepage": "https://github.com/FGRibreau/xImg",
+    "repository": "git://github.com/FGRibreau/xImg.git",
+
+    "devDependencies":{
+        "qunit":"0.1.3"
+    },
+
+    "scripts": {
+        "test": "node node_modules/qunit/bin/cli.js -c xImg.js -t tests/test.xImg.js"
+    },
+    
+    "repository": "",
+    "author" : "Francois-Guillaume Ribreau <npm@fgribreau.com> (http://fgribreau.com)",
+    "main" : "xImg",
+    "engines": { "node": "*" }
+}

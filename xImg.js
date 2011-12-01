@@ -193,4 +193,4 @@ xImg.prototype = {
 };
 
 
-})(window);
+})(typeof exports === 'undefined' ? window : exports);
