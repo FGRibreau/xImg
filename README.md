@@ -69,3 +69,6 @@ x1.send({h:'llo', w:'orld'}, function(){
 * Safari 5.0.5 
 * Opera 10.10
 ... Should work in IE (hahaha)
+
+## Donate
+[Donate Bitcoins](https://coinbase.com/checkouts/fc3041b9d8116e0b98e7d243c4727a30)
