@@ -1,4 +1,4 @@
-# xImg - JavaScript Cross-domain data sending library (using HTTP GET image transport) [![Build Status](https://secure.travis-ci.org/FGRibreau/xImg.png)](http://travis-ci.org/FGRibreau/node-ast-inlining) #
+# xImg - JavaScript Cross-domain data sending library (using HTTP GET image transport) [![Build Status](https://secure.travis-ci.org/FGRibreau/xImg.png)](http://travis-ci.org/FGRibreau/node-ast-inlining) [![Gittip](http://badgr.co/gittip/fgribreau.png)](https://www.gittip.com/fgribreau/)
 
 
 ## Requirements: ##
